@@ -113,7 +113,8 @@
             right: 0;
             background-color: var(--bg-darker);
             border: 1px solid #333;
-            border-radius: 6px;
+            border-top: none;
+            border-radius: 0 0 6px 6px;
             max-height: 300px;
             overflow-y: auto;
             z-index: 10;
@@ -229,7 +230,8 @@
             let currentFormat = 'sentence';
             
             // Toggle dropdown
-            selectBtn.addEventListener('click', function() {
+            selectBtn.addEventListener('click', function(e) {
+                e.stopPropagation(); // Prevent immediate closing
                 optionsDropdown.classList.toggle('show');
                 selectBtn.classList.toggle('active');
             });
@@ -256,11 +258,14 @@
             });
             
             // Close dropdown when clicking outside
-            document.addEventListener('click', function(e) {
-                if (!selectBtn.contains(e.target) {
-                    optionsDropdown.classList.remove('show');
-                    selectBtn.classList.remove('active');
-                }
+            document.addEventListener('click', function() {
+                optionsDropdown.classList.remove('show');
+                selectBtn.classList.remove('active');
+            });
+            
+            // Prevent dropdown from closing when clicking inside it
+            optionsDropdown.addEventListener('click', function(e) {
+                e.stopPropagation();
             });
             
             // Auto-update output when input changes
