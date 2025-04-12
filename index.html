@@ -1,0 +1,417 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Advanced Text Formatter</title>
+    <style>
+        :root {
+            --bg-dark: #121212;
+            --bg-darker: #0a0a0a;
+            --bg-light: #1e1e1e;
+            --primary: #1e88e5;
+            --primary-light: #42a5f5;
+            --primary-dark: #1565c0;
+            --text-primary: #e0e0e0;
+            --text-secondary: #9e9e9e;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-dark);
+            color: var(--text-primary);
+            margin: 0;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background-color: var(--bg-light);
+            border-radius: 10px;
+            padding: 25px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+        }
+        
+        h1 {
+            color: var(--primary);
+            text-align: center;
+            margin-bottom: 25px;
+            font-weight: 500;
+        }
+        
+        .input-group {
+            margin-bottom: 20px;
+        }
+        
+        label {
+            display: block;
+            margin-bottom: 8px;
+            color: var(--primary-light);
+            font-weight: 500;
+        }
+        
+        textarea {
+            width: 100%;
+            min-height: 150px;
+            padding: 12px;
+            border-radius: 6px;
+            border: 1px solid #333;
+            background-color: var(--bg-darker);
+            color: var(--text-primary);
+            font-size: 16px;
+            resize: vertical;
+            transition: border 0.3s;
+        }
+        
+        textarea:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 2px rgba(30, 136, 229, 0.2);
+        }
+        
+        .format-selector {
+            position: relative;
+            margin-bottom: 25px;
+        }
+        
+        .select-btn {
+            width: 100%;
+            padding: 12px 15px;
+            background-color: var(--bg-darker);
+            border: 1px solid #333;
+            border-radius: 6px;
+            color: var(--text-primary);
+            font-size: 16px;
+            text-align: left;
+            cursor: pointer;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            transition: all 0.3s;
+        }
+        
+        .select-btn:hover {
+            border-color: var(--primary);
+        }
+        
+        .select-btn:after {
+            content: "▼";
+            font-size: 12px;
+            transition: transform 0.3s;
+        }
+        
+        .select-btn.active:after {
+            transform: rotate(180deg);
+        }
+        
+        .options-dropdown {
+            position: absolute;
+            top: 100%;
+            left: 0;
+            right: 0;
+            background-color: var(--bg-darker);
+            border: 1px solid #333;
+            border-radius: 6px;
+            max-height: 300px;
+            overflow-y: auto;
+            z-index: 10;
+            display: none;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+        }
+        
+        .options-dropdown.show {
+            display: block;
+        }
+        
+        .option {
+            padding: 12px 15px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        
+        .option:hover {
+            background-color: rgba(30, 136, 229, 0.1);
+        }
+        
+        .option.active {
+            background-color: rgba(30, 136, 229, 0.2);
+            color: var(--primary-light);
+        }
+        
+        .output-container {
+            margin-top: 30px;
+            position: relative;
+        }
+        
+        .copy-btn {
+            width: 100%;
+            margin-top: 10px;
+            background-color: var(--primary);
+            color: white;
+            border: none;
+            padding: 12px 15px;
+            border-radius: 6px;
+            cursor: pointer;
+            font-size: 16px;
+            transition: background 0.2s;
+        }
+        
+        .copy-btn:hover {
+            background-color: var(--primary-light);
+        }
+        
+        .copy-btn:active {
+            transform: translateY(1px);
+        }
+        
+        .copy-btn.copied {
+            background-color: #4caf50;
+        }
+        
+        @media (min-width: 768px) {
+            .copy-btn {
+                position: absolute;
+                width: auto;
+                right: 10px;
+                top: 10px;
+                margin-top: 0;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Advanced Text Formatter</h1>
+        
+        <div class="input-group">
+            <label for="input-text">Input Text:</label>
+            <textarea id="input-text" placeholder="Type or paste your text here..."></textarea>
+        </div>
+        
+        <div class="format-selector">
+            <button class="select-btn" id="select-btn">Sentence case</button>
+            <div class="options-dropdown" id="options-dropdown">
+                <div class="option active" data-value="sentence">Sentence case</div>
+                <div class="option" data-value="title">Title Case (Oxford Style)</div>
+                <div class="option" data-value="uppercase">UPPERCASE</div>
+                <div class="option" data-value="lowercase">lowercase</div>
+                <div class="option" data-value="capitalize">Capitalize Each Word</div>
+                <div class="option" data-value="inverse">InVeRsE CaSe</div>
+                <div class="option" data-value="alternating">aLtErNaTiNg cAsE</div>
+                <div class="option" data-value="reverse">Reverse Text</div>
+                <div class="option" data-value="reverse-words">Reverse Words Only</div>
+                <div class="option" data-value="snake">snake_case</div>
+                <div class="option" data-value="kebab">kebab-case</div>
+                <div class="option" data-value="camel">camelCase</div>
+                <div class="option" data-value="pascal">PascalCase</div>
+                <div class="option" data-value="dot">dot.case</div>
+            </div>
+        </div>
+        
+        <div class="output-container">
+            <label for="output-text">Formatted Text:</label>
+            <textarea id="output-text" readonly></textarea>
+            <button class="copy-btn" id="copy-btn">Copy</button>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const inputText = document.getElementById('input-text');
+            const outputText = document.getElementById('output-text');
+            const copyBtn = document.getElementById('copy-btn');
+            const selectBtn = document.getElementById('select-btn');
+            const optionsDropdown = document.getElementById('options-dropdown');
+            const options = document.querySelectorAll('.option');
+            
+            let currentFormat = 'sentence';
+            
+            // Toggle dropdown
+            selectBtn.addEventListener('click', function() {
+                optionsDropdown.classList.toggle('show');
+                selectBtn.classList.toggle('active');
+            });
+            
+            // Select option
+            options.forEach(option => {
+                option.addEventListener('click', function() {
+                    const value = this.getAttribute('data-value');
+                    const text = this.textContent;
+                    
+                    // Update selected option
+                    options.forEach(opt => opt.classList.remove('active'));
+                    this.classList.add('active');
+                    
+                    // Update button text
+                    selectBtn.textContent = text;
+                    optionsDropdown.classList.remove('show');
+                    selectBtn.classList.remove('active');
+                    
+                    // Update format and output
+                    currentFormat = value;
+                    updateOutput();
+                });
+            });
+            
+            // Close dropdown when clicking outside
+            document.addEventListener('click', function(e) {
+                if (!selectBtn.contains(e.target) {
+                    optionsDropdown.classList.remove('show');
+                    selectBtn.classList.remove('active');
+                }
+            });
+            
+            // Auto-update output when input changes
+            inputText.addEventListener('input', updateOutput);
+            
+            function updateOutput() {
+                const text = inputText.value;
+                let formattedText = text;
+                
+                switch(currentFormat) {
+                    case 'sentence':
+                        formattedText = toSentenceCase(text);
+                        break;
+                    case 'title':
+                        formattedText = toTitleCase(text);
+                        break;
+                    case 'uppercase':
+                        formattedText = text.toUpperCase();
+                        break;
+                    case 'lowercase':
+                        formattedText = text.toLowerCase();
+                        break;
+                    case 'capitalize':
+                        formattedText = capitalizeWords(text);
+                        break;
+                    case 'inverse':
+                        formattedText = inverseCase(text);
+                        break;
+                    case 'alternating':
+                        formattedText = alternatingCase(text);
+                        break;
+                    case 'reverse':
+                        formattedText = reverseText(text);
+                        break;
+                    case 'reverse-words':
+                        formattedText = reverseWords(text);
+                        break;
+                    case 'snake':
+                        formattedText = toSnakeCase(text);
+                        break;
+                    case 'kebab':
+                        formattedText = toKebabCase(text);
+                        break;
+                    case 'camel':
+                        formattedText = toCamelCase(text);
+                        break;
+                    case 'pascal':
+                        formattedText = toPascalCase(text);
+                        break;
+                    case 'dot':
+                        formattedText = toDotCase(text);
+                        break;
+                }
+                
+                outputText.value = formattedText;
+            }
+            
+            // Copy button functionality
+            copyBtn.addEventListener('click', function() {
+                outputText.select();
+                document.execCommand('copy');
+                copyBtn.classList.add('copied');
+                copyBtn.textContent = 'Copied!';
+                
+                setTimeout(() => {
+                    copyBtn.classList.remove('copied');
+                    copyBtn.textContent = 'Copy';
+                }, 2000);
+            });
+            
+            // Formatting functions
+            function toSentenceCase(str) {
+                return str.toLowerCase().replace(/(^\s*\w|[.!?]\s*\w)/g, function(c) {
+                    return c.toUpperCase();
+                });
+            }
+            
+            function toTitleCase(str) {
+                const smallWords = ['a', 'an', 'and', 'as', 'at', 'but', 'by', 'for', 'in', 'nor', 'of', 'on', 'or', 'so', 'the', 'to', 'up', 'yet', 'via'];
+                
+                return str.toLowerCase().split(' ').map((word, index, array) => {
+                    if (index !== 0 && index !== array.length - 1 && smallWords.includes(word)) {
+                        return word;
+                    }
+                    return word.charAt(0).toUpperCase() + word.slice(1);
+                }).join(' ');
+            }
+            
+            function capitalizeWords(str) {
+                return str.toLowerCase().split(' ').map(word => {
+                    return word.charAt(0).toUpperCase() + word.slice(1);
+                }).join(' ');
+            }
+            
+            function inverseCase(str) {
+                return str.split('').map(c => {
+                    return c === c.toLowerCase() ? c.toUpperCase() : c.toLowerCase();
+                }).join('');
+            }
+            
+            function alternatingCase(str) {
+                return str.split('').map((c, i) => {
+                    return i % 2 === 0 ? c.toLowerCase() : c.toUpperCase();
+                }).join('');
+            }
+            
+            function reverseText(str) {
+                return str.split('').reverse().join('');
+            }
+            
+            function reverseWords(str) {
+                return str.split(' ').reverse().join(' ');
+            }
+            
+            function toSnakeCase(str) {
+                return str.trim()
+                    .replace(/[^\w\s]/g, '')
+                    .replace(/\s+/g, '_')
+                    .toLowerCase();
+            }
+            
+            function toKebabCase(str) {
+                return str.trim()
+                    .replace(/[^\w\s]/g, '')
+                    .replace(/\s+/g, '-')
+                    .toLowerCase();
+            }
+            
+            function toCamelCase(str) {
+                return str.trim()
+                    .replace(/[^\w\s]/g, '')
+                    .split(/\s+/)
+                    .map((word, i) => i === 0 ? word.toLowerCase() : word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+                    .join('');
+            }
+            
+            function toPascalCase(str) {
+                return str.trim()
+                    .replace(/[^\w\s]/g, '')
+                    .split(/\s+/)
+                    .map(word => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+                    .join('');
+            }
+            
+            function toDotCase(str) {
+                return str.trim()
+                    .replace(/[^\w\s]/g, '')
+                    .replace(/\s+/g, '.')
+                    .toLowerCase();
+            }
+        });
+    </script>
+</body>
+</html>
