@@ -208,6 +208,7 @@
                 <div class="option" data-value="camel">camelCase</div>
                 <div class="option" data-value="pascal">PascalCase</div>
                 <div class="option" data-value="dot">dot.case</div>
+                <div class="option" data-value="clap">clap.case</div>
             </div>
         </div>
         
@@ -318,6 +319,9 @@
                     case 'dot':
                         formattedText = toDotCase(text);
                         break;
+                    case 'clap':
+                        formattedText = toClapCase(text);
+                        break;
                 }
                 
                 outputText.value = formattedText;
@@ -414,6 +418,12 @@
                 return str.trim()
                     .replace(/[^\w\s]/g, '')
                     .replace(/\s+/g, '.')
+                    .toLowerCase();
+            }
+            function toClapCase(str) {
+                return str.trim()
+                    .replace(/[^\w\s]/g, '')
+                    .replace(/\s+/g, '👏 ')
                     .toLowerCase();
             }
         });
